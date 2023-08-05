@@ -50,21 +50,33 @@ def get_logger() -> logging.Logger:
     logger.addHandler(stream_handler)
     return logger
 
+
 def get_db() -> mysql.connector.connection.MySQLConnection:
-    """
-    Returns a MySQLConnection object for accessing Personal Data database
-
-    Returns:
-        A MySQLConnection object using connection details from
-        environment variables
-    """
-    username = environ.get("PERSONAL_DATA_DB_USERNAME", "root")
-    password = environ.get("PERSONAL_DATA_DB_PASSWORD", "")
-    host = environ.get("PERSONAL_DATA_DB_HOST", "localhost")
-    db_name = environ.get("PERSONAL_DATA_DB_NAME")
-
-    cnx = mysql.connector.connection.MySQLConnection(user=username,
+    ''' Connect to secure database '''
+    host = environ.get('PERSONAL_DATA_DB_HOST') or 'localhost'
+    user = environ.get('PERSONAL_DATA_DB_USERNAME') or 'root'
+    password = environ.get('PERSONAL_DATA_DB_PASSWORD') or ''
+    db = environ.get('PERSONAL_DATA_DB_NAME')
+    cur = mysql.connector.connection.MySQLConnection(host=host,
+                                                     user=user,
                                                      password=password,
-                                                     host=host,
-                                                     database=db_name)
-    return cnx
+                                                     database=db)
+    return cur
+
+
+def main():
+    ''' Read and filter data '''
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM users;')
+    field_names = [i[0] for i in cursor.description]
+    logger = get_logger()
+    for row in cursor:
+        message = ''.join('{}={}; '.format(k, v) for k, v in zip(fields, row))
+        logger.info(message.strip())
+    cursor.close()
+    db.close()
+
+
+if __name__ == '__main__':
+    main()
