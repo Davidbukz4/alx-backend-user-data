@@ -5,6 +5,8 @@ Handling Personal Data
 import re
 from typing import List
 import logging
+from os import environ
+import mysql.connector
 PII_FIELDS = ('name', 'email', 'phone', 'ssn', 'password')
 
 
@@ -47,3 +49,16 @@ def get_logger() -> logging.Logger:
     stream_handler.setFormatter(RedactingFormatter(list(PII_FIELDS)))
     logger.addHandler(stream_handler)
     return logger
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    ''' Connect to secure database '''
+    host = environ.get('PERSONAL_DATA_DB_HOST')
+    user = environ.get('PERSONAL_DATA_DB_USERNAME')
+    password = environ.get('PERSONAL_DATA_DB_PASSWORD')
+    db = environ.get('PERSONAL_DATA_DB_NAME')
+    cur = mysql.connector.connection.MySQLConnection(host=host,
+                                                     user=user,
+                                                     password=password,
+                                                     database=db)
+    return cur
