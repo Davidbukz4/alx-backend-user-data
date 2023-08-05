@@ -5,7 +5,7 @@ Handling Personal Data
 import re
 from typing import List
 import logging
-from os import environ
+from os import getenv
 import mysql.connector
 PII_FIELDS = ('name', 'email', 'phone', 'ssn', 'password')
 
@@ -53,10 +53,10 @@ def get_logger() -> logging.Logger:
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
     ''' Connect to secure database '''
-    host = environ.get('PERSONAL_DATA_DB_HOST') or 'localhost'
-    user = environ.get('PERSONAL_DATA_DB_USERNAME') or 'root'
-    password = environ.get('PERSONAL_DATA_DB_PASSWORD') or ''
-    db = environ.get('PERSONAL_DATA_DB_NAME')
+    host = getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    user = getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    db = getenv('PERSONAL_DATA_DB_NAME')
     cur = mysql.connector.connection.MySQLConnection(host=host,
                                                      user=user,
                                                      password=password,
